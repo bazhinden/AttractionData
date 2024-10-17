@@ -1,10 +1,12 @@
 package com.example.attractions.repository;
 
 import com.example.attractions.model.Attraction;
+import com.example.attractions.model.AttractionType;
 import com.example.attractions.model.Locality;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -19,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Testcontainers
 @DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class AttractionRepositoryIntegrationTest {
 
     @Container
@@ -47,11 +50,13 @@ class AttractionRepositoryIntegrationTest {
     void setUp() {
         locality = new Locality();
         locality.setName("Locality 1");
+        locality.setRegion("Region 1");
         locality = localityRepository.save(locality);
 
         attraction = new Attraction();
         attraction.setName("Attraction 1");
         attraction.setLocality(locality);
+        attraction.setType(AttractionType.MUSEUM);
         attractionRepository.save(attraction);
     }
 
@@ -60,11 +65,14 @@ class AttractionRepositoryIntegrationTest {
         Optional<Attraction> foundAttraction = attractionRepository.findById(attraction.getId());
         assertTrue(foundAttraction.isPresent());
         assertEquals(attraction.getName(), foundAttraction.get().getName());
+        assertNotNull(foundAttraction.get().getCreationDate(), "creationDate должно быть установлено автоматически");
     }
 
     @Test
     void testFindByLocalityId() {
         var attractions = attractionRepository.findByLocalityId(locality.getId(), PageRequest.of(0, 10));
         assertEquals(1, attractions.getTotalElements());
+        Attraction found = attractions.getContent().get(0);
+        assertNotNull(found.getCreationDate(), "creationDate должно быть установлено автоматически");
     }
 }

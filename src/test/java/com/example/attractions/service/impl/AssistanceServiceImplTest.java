@@ -68,21 +68,43 @@ class AssistanceServiceImplTest {
     void testUpdateAssistance_NotFound() {
         when(assistanceRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> assistanceService.updateAssistance(1L, assistanceDto));
+        NotFoundException exception = assertThrows(NotFoundException.class, () ->
+                assistanceService.updateAssistance(1L, assistanceDto)
+        );
+        assertEquals("Assistance not found with ID: 1", exception.getMessage());
         verify(assistanceRepository, times(1)).findById(anyLong());
     }
 
     @Test
     void testDeleteAssistance() {
-        doNothing().when(assistanceRepository).deleteById(anyLong());
+        when(assistanceRepository.existsById(1L)).thenReturn(true);
+        doNothing().when(assistanceRepository).deleteById(1L);
+
         assistanceService.deleteAssistance(1L);
-        verify(assistanceRepository, times(1)).deleteById(anyLong());
+
+        verify(assistanceRepository, times(1)).existsById(1L);
+        verify(assistanceRepository, times(1)).deleteById(1L);
+    }
+
+    @Test
+    void testDeleteAssistance_NotFound() {
+        when(assistanceRepository.existsById(1L)).thenReturn(false);
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () ->
+                assistanceService.deleteAssistance(1L)
+        );
+        assertEquals("Assistance not found with ID: 1", exception.getMessage());
+        verify(assistanceRepository, times(1)).existsById(1L);
+        verify(assistanceRepository, times(0)).deleteById(anyLong());
     }
 
     @Test
     void testGetAssistanceById_NotFound() {
         when(assistanceRepository.findById(anyLong())).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> assistanceService.getAssistanceById(1L));
+        NotFoundException exception = assertThrows(NotFoundException.class, () ->
+                assistanceService.getAssistanceById(1L)
+        );
+        assertEquals("Assistance not found with ID: 1", exception.getMessage());
     }
 
     @Test

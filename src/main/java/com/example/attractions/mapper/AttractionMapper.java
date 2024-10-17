@@ -4,7 +4,6 @@ import com.example.attractions.dto.AttractionDto;
 import com.example.attractions.model.Assistance;
 import com.example.attractions.model.Attraction;
 import com.example.attractions.model.AttractionType;
-import com.example.attractions.model.Locality;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -15,7 +14,6 @@ import java.util.stream.Collectors;
 /**
  * Маппер для преобразования между Attraction и AttractionDto.
  */
-
 @Mapper(componentModel = "spring")
 public interface AttractionMapper {
 
@@ -24,24 +22,17 @@ public interface AttractionMapper {
     @Mapping(target = "type", source = "type", qualifiedByName = "mapTypeToString")
     AttractionDto toDto(Attraction attraction);
 
-    @Mapping(source = "localityId", target = "locality")
     @Mapping(target = "assistanceList", ignore = true)
     @Mapping(target = "type", source = "type", qualifiedByName = "mapStringToType")
+    @Mapping(target = "creationDate", ignore = true)
     Attraction toEntity(AttractionDto dto);
 
     @Named("mapAssistanceIds")
     default List<Long> mapAssistanceIds(List<Assistance> assistanceList) {
         if (assistanceList == null) return null;
-        return assistanceList.stream().map(Assistance::getId).collect(Collectors.toList());
-    }
-
-    default Locality map(Long localityId) {
-        if (localityId == null) {
-            return null;
-        }
-        Locality locality = new Locality();
-        locality.setId(localityId);
-        return locality;
+        return assistanceList.stream()
+                .map(Assistance::getId)
+                .collect(Collectors.toList());
     }
 
     @Named("mapTypeToString")
@@ -51,6 +42,6 @@ public interface AttractionMapper {
 
     @Named("mapStringToType")
     default AttractionType mapStringToType(String type) {
-        return type != null ? AttractionType.valueOf(type) : null;
+        return type != null ? AttractionType.valueOf(type.toUpperCase()) : null;
     }
 }

@@ -1,50 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
 
-    <changeSet id="1" author="yourname">
+    <!-- Создание таблицы locality -->
+    <changeSet id="1" author="Denis Bazhin">
         <createTable tableName="locality">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="name" type="VARCHAR(255)"/>
-            <column name="region" type="VARCHAR(255)"/>
-            <column name="latitude" type="DOUBLE"/>
-            <column name="longitude" type="DOUBLE"/>
-            <column name="short_description" type="TEXT"/>
-        </createTable>
-    </changeSet>
-
-    <changeSet id="2" author="yourname">
-        <createTable tableName="attraction">
-            <column name="id" type="BIGINT" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
             </column>
-            <column name="name" type="VARCHAR(255)"/>
-            <column name="creation_date" type="DATE"/>
+            <column name="region" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="latitude" type="DOUBLE PRECISION"/>
+            <column name="longitude" type="DOUBLE PRECISION"/>
             <column name="short_description" type="TEXT"/>
-            <column name="type" type="VARCHAR(50)"/>
-            <column name="locality_id" type="BIGINT"/>
         </createTable>
-        <addForeignKeyConstraint
-                baseTableName="attraction"
-                baseColumnNames="locality_id"
-                constraintName="fk_attraction_locality"
-                referencedTableName="locality"
-                referencedColumnNames="id"/>
-
     </changeSet>
 
-    <changeSet id="3" author="yourname">
+    <!-- Создание таблицы assistance -->
+    <changeSet id="2" author="Denis Bazhin">
         <createTable tableName="assistance">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="type" type="VARCHAR(50)"/>
+            <column name="type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
             <column name="short_description" type="TEXT"/>
             <column name="executor" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
+
+    <!-- Создание таблицы attraction -->
+    <changeSet id="3" author="Denis Bazhin">
+        <createTable tableName="attraction">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="creation_date" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="short_description" type="TEXT"/>
+            <column name="type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="locality_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Создание таблицы связи attraction_assistance -->
+    <changeSet id="4" author="Denis Bazhin">
+        <createTable tableName="attraction_assistance">
+            <column name="attraction_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="assistance_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="attraction_assistance"
+                       columnNames="attraction_id, assistance_id"
+                       constraintName="pk_attraction_assistance"/>
+
+        <addForeignKeyConstraint baseTableName="attraction_assistance"
+                                 baseColumnNames="attraction_id"
+                                 referencedTableName="attraction"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_attraction_assistance_attraction"
+                                 onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint baseTableName="attraction_assistance"
+                                 baseColumnNames="assistance_id"
+                                 referencedTableName="assistance"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_attraction_assistance_assistance"
+                                 onDelete="CASCADE"/>
+    </changeSet>
+
+    <!-- Создание таблицы связи locality_assistance -->
+    <changeSet id="5" author="Denis Bazhin">
+        <createTable tableName="locality_assistance">
+            <column name="locality_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="assistance_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="locality_assistance"
+                       columnNames="locality_id, assistance_id"
+                       constraintName="pk_locality_assistance"/>
+
+        <addForeignKeyConstraint baseTableName="locality_assistance"
+                                 baseColumnNames="locality_id"
+                                 referencedTableName="locality"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_locality_assistance_locality"
+                                 onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint baseTableName="locality_assistance"
+                                 baseColumnNames="assistance_id"
+                                 referencedTableName="assistance"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_locality_assistance_assistance"
+                                 onDelete="CASCADE"/>
+    </changeSet>
+
 </databaseChangeLog>

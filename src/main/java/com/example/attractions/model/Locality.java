@@ -1,21 +1,13 @@
 package com.example.attractions.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-
 import java.util.List;
 
 /**
  * Модель данных для местоположений.
  */
-
 @Data
 @Entity
 public class Locality {
@@ -23,8 +15,14 @@ public class Locality {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name; //населенный пункт
+    @NotBlank
+    @Column(nullable = false)
+    private String name;
+
+    @NotBlank
+    @Column(nullable = false)
     private String region;
+
     private Double latitude;
     private Double longitude;
     private String shortDescription;

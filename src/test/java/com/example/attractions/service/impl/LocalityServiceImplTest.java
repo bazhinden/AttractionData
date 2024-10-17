@@ -42,10 +42,12 @@ class LocalityServiceImplTest {
         localityDto = new LocalityDto();
         localityDto.setId(1L);
         localityDto.setName("Locality Name");
+        localityDto.setRegion("Region Name");
 
         locality = new Locality();
         locality.setId(1L);
         locality.setName("Locality Name");
+        locality.setRegion("Region Name");
     }
 
     @Test
@@ -65,15 +67,43 @@ class LocalityServiceImplTest {
     void testUpdateLocality_NotFound() {
         when(localityRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> localityService.updateLocality(1L, localityDto));
+        NotFoundException exception = assertThrows(NotFoundException.class, () ->
+                localityService.updateLocality(1L, localityDto)
+        );
+        assertEquals("Locality not found with ID: 1", exception.getMessage());
         verify(localityRepository, times(1)).findById(anyLong());
     }
 
     @Test
     void testDeleteLocality() {
-        doNothing().when(localityRepository).deleteById(anyLong());
+        when(localityRepository.existsById(1L)).thenReturn(true);
+        doNothing().when(localityRepository).deleteById(1L);
+
         localityService.deleteLocality(1L);
-        verify(localityRepository, times(1)).deleteById(anyLong());
+
+        verify(localityRepository, times(1)).existsById(1L);
+        verify(localityRepository, times(1)).deleteById(1L);
+    }
+
+    @Test
+    void testDeleteLocality_NotFound() {
+        when(localityRepository.existsById(1L)).thenReturn(false);
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () ->
+                localityService.deleteLocality(1L)
+        );
+        assertEquals("Locality not found with ID: 1", exception.getMessage());
+        verify(localityRepository, times(1)).existsById(1L);
+        verify(localityRepository, times(0)).deleteById(anyLong());
+    }
+
+    @Test
+    void testGetLocalityById_NotFound() {
+        when(localityRepository.findById(anyLong())).thenReturn(Optional.empty());
+        NotFoundException exception = assertThrows(NotFoundException.class, () ->
+                localityService.getLocalityById(1L)
+        );
+        assertEquals("Locality not found with ID: 1", exception.getMessage());
     }
 
     @Test
